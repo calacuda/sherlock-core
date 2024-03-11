@@ -85,7 +85,7 @@ fn logger_init_helper(module: SherlockModule) -> anyhow::Result<bool> {
         }
         Ok(_) | Err(_) => {
             dispatch.apply()?;
-            warn!("not loggin to log files, this should only be done when testing. if you are runnign this in prod, be warned.");
+            warn!("not loggin to log files, this should only be done when testing. if you are running this in prod, be warned.");
             Ok(false)
         }
     }
