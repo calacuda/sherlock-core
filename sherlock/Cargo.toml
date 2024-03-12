@@ -5,11 +5,18 @@ edition = "2021"
 
 [dependencies]
 actix = "0.13.3"
+actix-broker = "0.4.3"
 actix-web = "4.5.1"
 actix-web-actors = "4.3.0"
 anyhow = "1.0.80"
 chrono = "0.4.35"
 colored = { version = "2.1.0", features = ["no-color"] }
+ctrlc = "3.4.4"
+event-emitter-rs = "0.1.4"
 fern = { version = "0.6.2", features = ["colored", "date-based"] }
+figment = { version = "0.10.14", features = ["toml"] }
 log = { version = "0.4.21", features = ["release_max_level_trace", "max_level_trace"] }
+serde = { version = "1.0.197", features = ["derive"] }
+serde_json = "1.0.114"
 simple_logger = "4.3.3"
+xdg = "2.5.2"

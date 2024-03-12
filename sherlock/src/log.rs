@@ -1,7 +1,7 @@
 use crate::SherlockModule;
 use chrono::prelude::*;
 use fern::colors::{Color, ColoredLevelConfig};
-use log::*;
+pub use log::*;
 
 pub enum LogLevel {
     /// corresponds to "trace!"
@@ -85,7 +85,7 @@ fn logger_init_helper(module: SherlockModule) -> anyhow::Result<bool> {
         }
         Ok(_) | Err(_) => {
             dispatch.apply()?;
-            warn!("not loggin to log files, this should only be done when testing. if you are running this in prod, be warned.");
+            warn!("not logging to log files, this should only be done when testing. if you are running this in prod, be warned.");
             Ok(false)
         }
     }

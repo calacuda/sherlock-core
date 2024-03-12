@@ -1,16 +1,18 @@
 use std::fmt::Display;
 
 pub mod log;
+pub mod message_bus;
+pub mod utils;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum SherlockModule {
-    /// represents the "audio" intake, AKA the websockets input that recieves user uteranceses
+    /// represents the "audio" intake, AKA the websockets input that receives user uteranceses
     Audio,
     /// the message-bus that is used to pass messages between sherlock components
     MessageBus,
     /// the skill picker, dispacher and the Skills them selves
     Skills,
-    /// the module reponsible for making sherlock speek. (ie. mimic3, or other TTS engines.)
+    /// the module responsible for making sherlock speek. (ie. mimic3, or other TTS engines.)
     Voice,
 }
 
