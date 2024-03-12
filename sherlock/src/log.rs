@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use crate::SherlockModule;
 use chrono::prelude::*;
 use fern::colors::{Color, ColoredLevelConfig};
@@ -28,10 +30,15 @@ fn ensure_logging_dir(module: SherlockModule) -> Result<(), std::io::Error> {
 /// anyway. it is safe to call it multiple times.
 pub fn logger_init(module: SherlockModule) {
     if let Err(reason) = logger_init_helper(module) {
-        use simple_logger::SimpleLogger;
+        if !reason
+            .to_string()
+            .ends_with("the logging system was already initialized")
+        {
+            use simple_logger::SimpleLogger;
 
-        let _ = SimpleLogger::new().init();
-        error!("failed to initiate logger properly because: {reason}");
+            let _ = SimpleLogger::new().init();
+            error!("failed to initiate logger properly because: {reason}");
+        }
     } else {
         log::debug!("logger initiated");
     }
@@ -55,6 +62,10 @@ fn logger_init_helper(module: SherlockModule) -> anyhow::Result<bool> {
                 name = record.target(),
                 message = message,
             ))
+        })
+        .filter(|metadata| {
+            // Reject messages with the `Error` log level.
+            !metadata.target().starts_with("actix") && !metadata.target().starts_with("mio")
         })
         .chain(std::io::stderr());
 

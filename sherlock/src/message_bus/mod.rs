@@ -98,15 +98,28 @@ async fn index(
     resp
 }
 
+async fn start(configs: Configuration) -> anyhow::Result<()> {
+    let msg_event_addr = web::Data::new(SherlockMessageEvent.start());
+
+    HttpServer::new(move || {
+        App::new()
+            .app_data(msg_event_addr.clone())
+            .route(&configs.websocket.route, web::get().to(index))
+    })
+    .bind((configs.websocket.host, configs.websocket.port))?
+    .run()
+    .await?;
+
+    Ok(())
+}
+
 #[actix_web::main]
 pub async fn start_message_bus() -> anyhow::Result<()> {
     logger_init(SherlockModule::MessageBus);
 
     debug!("Loading message bus configs");
 
-    let configs = Configuration::get().websocket;
-
-    let msg_event_addr = web::Data::new(SherlockMessageEvent.start());
+    let configs = Configuration::get();
 
     let running = Arc::new(AtomicBool::new(true));
     let r = running.clone();
@@ -117,18 +130,19 @@ pub async fn start_message_bus() -> anyhow::Result<()> {
     })
     .expect("Error setting Ctrl-C handler");
 
-    HttpServer::new(move || {
-        on_ready();
+    let r = running.clone();
 
-        App::new()
-            .app_data(msg_event_addr.clone())
-            .route(&configs.route, web::get().to(index))
-    })
-    .bind((configs.host, configs.port))?
-    .run()
-    .await?;
+    actix_web::rt::spawn(async move {
+        if let Err(e) = start(configs).await {
+            error!("message-bus failed to start: {e}");
+            r.store(false, Ordering::SeqCst);
+        }
+    });
+
+    on_ready();
 
     while running.load(Ordering::SeqCst) {
+        // debug!("waiting...");
         std::thread::sleep(Duration::from_secs(1));
     }
 
