@@ -17,8 +17,11 @@ pub struct SherlockMessageEvent;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SherlockMessage {
-    // TODO: make this in the mycroft format
-    hello: String,
+    #[serde(rename = "type")]
+    msg_type: String,
+    // TODO: make these enums of empty structs instead of options
+    data: Option<serde_json::Value>,
+    context: Option<serde_json::Value>,
 }
 
 #[derive(Clone, Debug, Message)]
@@ -40,7 +43,7 @@ impl Handler<SherlockMessageInternalWrapper> for SherlockMessageEvent {
         msg: SherlockMessageInternalWrapper,
         _ctx: &mut Self::Context,
     ) -> Self::Result {
-        log::trace!("SherlockMessageEvent recv message => {:?}", msg);
+        // log::trace!("SherlockMessageEvent recv message => {:?}", msg);
         self.issue_async::<SystemBroker, _>(msg);
     }
 }
@@ -92,12 +95,16 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MessageBus {
             Ok(ws::Message::Ping(msg)) => ctx.pong(&msg),
             Ok(ws::Message::Text(text)) => {
                 // ctx.text(text.clone());
-                self.event.do_send(SherlockMessageInternalWrapper {
-                    id: self.id,
-                    message: serde_json::from_str(&text.to_string()).unwrap(),
-                })
+                if let Ok(message) = serde_json::from_str(&text.to_string()) {
+                    self.event.do_send(SherlockMessageInternalWrapper {
+                        id: self.id,
+                        message,
+                    })
+                } else {
+                    ctx.text("{\"response\":\"malformed JSON message.\"}")
+                }
             }
-            Ok(ws::Message::Binary(bin)) => ctx.binary(bin),
+            Ok(ws::Message::Binary(_bin)) => ctx.text("{\"response\":\"not yet implemented\"}"), // ctx.binary(bin),
             _ => (),
         }
     }
