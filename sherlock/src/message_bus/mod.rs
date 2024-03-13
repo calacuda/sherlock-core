@@ -155,7 +155,7 @@ async fn start(configs: Configuration) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn start_message_bus() -> anyhow::Result<()> {
+pub fn start_message_bus() {
     logger_init(SherlockModule::MessageBus);
 
     debug!("Loading message bus configs");
@@ -186,6 +186,4 @@ pub fn start_message_bus() -> anyhow::Result<()> {
         // debug!("waiting...");
         std::thread::sleep(Duration::from_secs(1));
     }
-
-    Ok(())
 }
