@@ -4,7 +4,9 @@ use actix_broker::{BrokerIssue, BrokerSubscribe, SystemBroker};
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use actix_web_actors::ws;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::{
+    collections::HashMap,
     sync::{
         atomic::{AtomicBool, Ordering},
         Arc, Mutex,
@@ -19,9 +21,14 @@ pub struct SherlockMessageEvent;
 pub struct SherlockMessage {
     #[serde(rename = "type")]
     msg_type: String,
-    // TODO: make these enums of empty structs instead of options
-    data: Option<serde_json::Value>,
-    context: Option<serde_json::Value>,
+    #[serde(default = "empty_map")]
+    data: HashMap<String, Value>,
+    #[serde(default = "empty_map")]
+    context: HashMap<String, Value>,
+}
+
+fn empty_map() -> HashMap<String, Value> {
+    HashMap::new()
 }
 
 #[derive(Clone, Debug, Message)]
