@@ -13,6 +13,7 @@ __pycache__/
 .venv/
 env/
 bin/
+!/sherlock/src/bin/
 build/
 develop-eggs/
 dist/
