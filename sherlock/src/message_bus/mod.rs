@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::{
     sync::{
         atomic::{AtomicBool, Ordering},
-        Arc,
+        Arc, Mutex,
     },
     time::Duration,
 };
@@ -15,20 +15,31 @@ use std::{
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SherlockMessageEvent;
 
-#[derive(Clone, Debug, Message, Serialize, Deserialize)]
-#[rtype(result = "()")]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SherlockMessage {
+    // TODO: make this in the mycroft format
     hello: String,
+}
+
+#[derive(Clone, Debug, Message)]
+#[rtype(result = "()")]
+pub struct SherlockMessageInternalWrapper {
+    id: usize,
+    message: SherlockMessage,
 }
 
 impl Actor for SherlockMessageEvent {
     type Context = Context<Self>;
 }
 
-impl Handler<SherlockMessage> for SherlockMessageEvent {
+impl Handler<SherlockMessageInternalWrapper> for SherlockMessageEvent {
     type Result = ();
 
-    fn handle(&mut self, msg: SherlockMessage, _ctx: &mut Self::Context) -> Self::Result {
+    fn handle(
+        &mut self,
+        msg: SherlockMessageInternalWrapper,
+        _ctx: &mut Self::Context,
+    ) -> Self::Result {
         log::trace!("SherlockMessageEvent recv message => {:?}", msg);
         self.issue_async::<SystemBroker, _>(msg);
     }
@@ -42,32 +53,34 @@ fn on_stopping() {
     debug!("Message bus is shutting down...");
 }
 
-// TODO: stop from sending the message to the sender.
 /// Define HTTP actor
 #[derive(Clone)]
 struct MessageBus {
     event: web::Data<Addr<SherlockMessageEvent>>,
+    id: usize,
 }
 
 impl Actor for MessageBus {
     type Context = ws::WebsocketContext<Self>;
 
     fn started(&mut self, ctx: &mut Self::Context) {
-        self.subscribe_async::<SystemBroker, SherlockMessage>(ctx);
+        self.subscribe_async::<SystemBroker, SherlockMessageInternalWrapper>(ctx);
     }
 }
 
-impl Handler<SherlockMessage> for MessageBus {
+impl Handler<SherlockMessageInternalWrapper> for MessageBus {
     type Result = ();
 
-    fn handle(&mut self, item: SherlockMessage, ctx: &mut Self::Context) {
-        log::trace!("{:?}", item);
-        self.issue_async::<SystemBroker, _>(item.clone());
+    fn handle(&mut self, item: SherlockMessageInternalWrapper, ctx: &mut Self::Context) {
+        // log::trace!("{:?}", item);
+        // self.issue_async::<SystemBroker, _>(item.clone());
 
-        if let Ok(json) = serde_json::to_string(&item) {
-            ctx.text(json);
-        } else {
-            warn!("could not serialize message to json string.");
+        if item.id != self.id {
+            if let Ok(json) = serde_json::to_string(&item.message) {
+                ctx.text(json);
+            } else {
+                warn!("could not serialize message to json string.");
+            }
         }
     }
 }
@@ -79,8 +92,10 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MessageBus {
             Ok(ws::Message::Ping(msg)) => ctx.pong(&msg),
             Ok(ws::Message::Text(text)) => {
                 // ctx.text(text.clone());
-                self.event
-                    .do_send(serde_json::from_str(&text.to_string()).unwrap());
+                self.event.do_send(SherlockMessageInternalWrapper {
+                    id: self.id,
+                    message: serde_json::from_str(&text.to_string()).unwrap(),
+                })
             }
             Ok(ws::Message::Binary(bin)) => ctx.binary(bin),
             _ => (),
@@ -90,20 +105,33 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MessageBus {
 
 async fn index(
     data: web::Data<Addr<SherlockMessageEvent>>,
+    counter: web::Data<Mutex<usize>>,
     req: HttpRequest,
     stream: web::Payload,
 ) -> Result<HttpResponse, Error> {
-    let resp = ws::start(MessageBus { event: data }, &req, stream);
-    info!("{:?}", resp);
+    let resp = ws::start(
+        MessageBus {
+            event: data,
+            id: *counter.lock().unwrap(),
+        },
+        &req,
+        stream,
+    );
+    // info!("{:?}", resp);
+    (*counter.lock().unwrap()) += 1;
+
     resp
 }
 
+#[actix_web::main]
 async fn start(configs: Configuration) -> anyhow::Result<()> {
     let msg_event_addr = web::Data::new(SherlockMessageEvent.start());
+    let counter = web::Data::new(Mutex::new(0_usize));
 
     HttpServer::new(move || {
         App::new()
             .app_data(msg_event_addr.clone())
+            .app_data(counter.clone())
             .route(&configs.websocket.route, web::get().to(index))
     })
     .bind((configs.websocket.host, configs.websocket.port))?
@@ -113,8 +141,7 @@ async fn start(configs: Configuration) -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_web::main]
-pub async fn start_message_bus() -> anyhow::Result<()> {
+pub fn start_message_bus() -> anyhow::Result<()> {
     logger_init(SherlockModule::MessageBus);
 
     debug!("Loading message bus configs");
@@ -132,8 +159,8 @@ pub async fn start_message_bus() -> anyhow::Result<()> {
 
     let r = running.clone();
 
-    actix_web::rt::spawn(async move {
-        if let Err(e) = start(configs).await {
+    std::thread::spawn(move || {
+        if let Err(e) = start(configs) {
             error!("message-bus failed to start: {e}");
             r.store(false, Ordering::SeqCst);
         }

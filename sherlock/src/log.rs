@@ -1,5 +1,3 @@
-use std::any::Any;
-
 use crate::SherlockModule;
 use chrono::prelude::*;
 use fern::colors::{Color, ColoredLevelConfig};

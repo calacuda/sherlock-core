@@ -1,3 +1,4 @@
+#![feature(let_chains)]
 use std::fmt::Display;
 
 pub mod log;
