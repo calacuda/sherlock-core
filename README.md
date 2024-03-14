@@ -16,6 +16,10 @@ A rust project seeking to rewrite [neon-core](https://github.com/NeonGeckoCom/Ne
         - [ ] make message send functions, etc
 - [ ] figure out a way to call out to [mimic3](https://github.com/MycroftAI/mimic3) (mimic3 has an HTTP server, use that for developement, testing, and as a backup.)
     - [ ] implement a rust interface for comunications with mimic3 from rust.
+- [ ] make intake server to recieve uterances from the outside world
+- [ ] make skill chooser
+    - [ ] make a utility to be used by a python decorator that loads intent files and produces a way to check the users utterance against that file.
+<!-- - [ ]  -->
 
 **more to come...**
 
