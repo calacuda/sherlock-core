@@ -1,0 +1,84 @@
+speak|Request to speak utterance
+mycroft.internet.connected|Internet connection is now available (only generated on initial connection)
+mycroft.ready|Sent by start-up sequence when everything is ready for user interaction
+mycroft.stop|Stop command (e.g. button pressed)
+mycroft.not.paired|Start the pairing process when this event is emitted.
+mycroft.paired|Pairing has completed
+mycroft.awoken|Has come out of sleep mode
+mycroft.debug.log|log level can be: "CRITICAL" "ERROR" "WARNING" "INFO" "DEBUG" These correspond to the Python logging object. The "bus" parameter allows turning the logging of all bus messages on/off.
+complete_intent_failure|Intent processing failed
+configuration.updated|Notification to services that the configuration has changed and needs reloaded
+recognizer_loop:wakeword|Wakeword was heard
+recognizer_loop:record_begin|Recording has started
+recognizer_loop:record_end|Recording has ended
+recognizer_loop:utterance|STT has detected the given text or text was injected as an utterance via the CLI.
+recognizer_loop:audio_output_start|Text output (TTS) has begun
+recognizer_loop:audio_output_end|Text output (TTS) has ended
+recognizer_loop:sleep|Go into "sleep" mode. Everything except "Hey Mycroft, wake up" will be ignored.
+recognizer_loop:wake_up|Come out of "sleep" mode.
+enclosure.notify.no_internet|Detected a connection error during STT
+enclosure.mouth.viseme_list|start: timestamp for audio starts (unix epoch) END_TIME: time in seconds from "start" until the end of the viseme CODE can be 0 = shape for sounds like 'y' or 'aa' 1 = shape for sounds like 'aw' 2 = shape for sounds like 'uh' or 'r' 3 = shape for sounds like 'th' or 'sh' 4 = neutral shape for no sound 5 = shape for sounds like 'f' or 'v' 6 = shape for sounds like 'oy' or 'ao'
+mycroft.eyes.default|Change eyes to default color
+mycroft.mic.listen|Begin recording for STT processing
+mycroft.mic.mute|Turn off the mic (no wakeword or STT processing)
+mycroft.mic.unmute|Turn on the mic (enable wakeword and STT processing)
+mycroft.audio.service.play|Start playback of tracklist
+mycroft.audio.service.stop|Stop playback
+mycroft.audio.service.pause|Pause playback (if supported)
+mycroft.audio.service.resume|Resume playback (if supported by backend)
+mycroft.audio.service.next|Skip to next track
+mycroft.audio.service.prev|Skip to previous track
+mycroft.audio.service.track_info|Request track info from audio service
+mycroft.audio.service.track_info_reply|Reply to track info request
+mycroft.audio.service.list_backends|Returns list of available backends.
+mycroft.volume.increase|Enclosure Volume up
+mycroft.volume.decrease|Enclosure Volume down
+mycroft.volume.mute|Enclosure Volume muted
+mycroft.volume.unmute|Enclosure Volume unmuted
+mycroft.volume.set|Set enclosure volume (0.0 = no output, 1.0 = loudest possible)
+mycroft.volume.get|Request volume level
+mycroft.volume.get.response| 
+mycroft.volume.duck|Reduce the volume level temporarily
+mycroft.volume.unduck|Restore the volume level
+mycroft.skill.handler.start| 
+mycroft.skill.handler.complete| 
+mycroft.skill.enable_intent|Enable disabled intent
+mycroft.skill.disable_intent|Disable intent
+mycroft.skills.loaded|A Skill has been loaded
+mycroft.skills.loading_failure|A Skill has failed to load
+mycroft.skills.shutdown|A Skill has shutdown
+mycroft.skills.initialized|Upon startup, all skills have been loaded
+mycroft.skills.list|List of loaded skills (response to 'skillmanager.list')
+mycroft.skills.settings.update|Pull new skill settings from the server
+msm.updating|MSM install has begun
+msm.installing|MSM update has begun
+msm.install.succeeded|MSM install succeeded for given skill
+msm.install.failed|MSM install failed for given skill
+msm.installed|MSM install is complete
+msm.updated|MSM update is complete
+msm.removing|MSM remove has begun
+msm.remove.succeeded|MSM remove succeeded for given skill
+msm.remove.failed|MSM remove failed for given skill
+msm.removed|MSM remove is complete
+skillmanager.deactivate|Deactivate a skill. Activate by typing ":deactivate " in the CLI
+skillmanager.list|List installed skills. Activate by typing ":list" in the CLI
+skillmanager.update|Request immediate update of all skills
+open|websocket connection has closed
+close|websocket connection wapy message-enum-maker.py | xclip -sel cs lost, reconnecting
+reconnecting|websocket connection has opened
+system.wifi.setup|Kick off a a wifi-setup session
+system.wifi.reset|Clear the saved wifi settings
+system.ntp.sync|Force the system clock to synchronize with NTP servers
+system.ssh.enable|Configure system to allow SSH connections
+system.ssh.disable|Configure system to block SSH connections
+system.reboot|Force a Linux reboot
+system.shutdown|Force a Linux shutdown
+system.update|Force an apt-get update on 'mycroft-mark-1' or 'mycroft-picroft' package (as appropriate)
+play:query| 
+play:query.response|There are three responses to a play:query. These are not intended to be consumed directly by a Skill, see the methods available in the CommonPlaySkill Class.
+play:start| 
+question:query| 
+question:query.response| 
+question:action| 
+private.mycroftai.has_alarm|Count of running alarms (0 == no alarms)
+spoken|Speak message data as audio, emitted by the TTS Node.
