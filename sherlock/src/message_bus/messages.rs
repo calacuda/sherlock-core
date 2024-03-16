@@ -5,18 +5,18 @@ use std::collections::HashMap;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SherlockMessage {
     #[serde(rename = "type")]
-    msg_type: SherlockMessageType,
+    pub msg_type: SherlockMessageType,
     #[serde(default = "empty_map")]
-    data: HashMap<String, Value>,
+    pub data: HashMap<String, Value>,
     #[serde(default = "empty_map")]
-    context: HashMap<String, Value>,
+    pub context: HashMap<String, Value>,
 }
 
 fn empty_map() -> HashMap<String, Value> {
     HashMap::new()
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum SherlockMessageType {
     /// Speak message data as audio, emitted by the TTS Node.
     #[serde(rename = "spoken")]
