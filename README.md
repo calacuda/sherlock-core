@@ -17,6 +17,15 @@ A rust project seeking to rewrite [neon-core](https://github.com/NeonGeckoCom/Ne
 - [ ] figure out a way to call out to [mimic3](https://github.com/MycroftAI/mimic3) (mimic3 has an HTTP server, use that for developement, testing, and as a backup.)
     - [ ] implement a rust interface for comunications with mimic3 from rust.
 - [ ] make intake server to recieve uterances from the outside world
+    - [ ] function over Websockets
+    - [ ] conncted to the message-bus
+    - [ ] take uterances/commands from the outside world.
+    - [ ] send back `speak` messages, &:
+        - [ ] TTS speach data if requested,
+        - [ ] client control byte code (if recieved from the message-bus)
+    - [ ] handles authentication
+    - [ ] optionally secured with TLS
+        - [ ] turn on/off from config file.
 - [ ] make skill chooser
     - [ ] make a utility to be used by a python decorator that loads intent files and produces a way to check the users utterance against that file.
 <!-- - [ ]  -->
