@@ -3,10 +3,9 @@ use actix::{Actor, Addr, Context, Handler, Message, StreamHandler};
 use actix_broker::{BrokerIssue, BrokerSubscribe, SystemBroker};
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use actix_web_actors::ws;
+use messages::SherlockMessage;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use std::{
-    collections::HashMap,
     sync::{
         atomic::{AtomicBool, Ordering},
         Arc, Mutex,
@@ -14,22 +13,10 @@ use std::{
     time::Duration,
 };
 
+pub mod messages;
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SherlockMessageEvent;
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct SherlockMessage {
-    #[serde(rename = "type")]
-    msg_type: String,
-    #[serde(default = "empty_map")]
-    data: HashMap<String, Value>,
-    #[serde(default = "empty_map")]
-    context: HashMap<String, Value>,
-}
-
-fn empty_map() -> HashMap<String, Value> {
-    HashMap::new()
-}
 
 #[derive(Clone, Debug, Message)]
 #[rtype(result = "()")]
@@ -82,9 +69,6 @@ impl Handler<SherlockMessageInternalWrapper> for MessageBus {
     type Result = ();
 
     fn handle(&mut self, item: SherlockMessageInternalWrapper, ctx: &mut Self::Context) {
-        // log::trace!("{:?}", item);
-        // self.issue_async::<SystemBroker, _>(item.clone());
-
         if item.id != self.id {
             if let Ok(json) = serde_json::to_string(&item.message) {
                 ctx.text(json);
@@ -108,10 +92,13 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MessageBus {
                         message,
                     })
                 } else {
+                    warn!("received a message that doesn't follow Sherlock Message specifications. Did you serialize it using from a SherlockMessage struct/object?");
                     ctx.text("{\"response\":\"malformed JSON message.\"}")
                 }
             }
-            Ok(ws::Message::Binary(_bin)) => ctx.text("{\"response\":\"not yet implemented\"}"), // ctx.binary(bin),
+            Ok(ws::Message::Binary(_bin)) => {
+                ctx.text("{\"response\":\"binary messages/responces are not yet implemented\"}")
+            } // ctx.binary(bin),
             _ => (),
         }
     }
