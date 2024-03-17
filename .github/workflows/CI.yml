@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         # TODO: add arm7, and aarch64 back
-        target: [x86_64, x86, armv7] # , armv7, aarch64, s390x, ppc64le
+        target: [x86_64, x86] # , armv7, aarch64, s390x, ppc64le
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
