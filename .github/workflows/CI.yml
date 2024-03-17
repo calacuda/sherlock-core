@@ -33,7 +33,7 @@ jobs:
       # - name: Set Env Vars
       #   run: 'export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig'
       - name: Add Target
-        run: rustup target add ${{ matrix.target }}-unknown-linux-musl
+        run: rustup target add ${{ matrix.target }}
       - name: Switch to Nightly
         run: 'rustup default nightly'
       - name: Config pkg-config
