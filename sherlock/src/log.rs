@@ -63,7 +63,13 @@ fn logger_init_helper(module: SherlockModule) -> anyhow::Result<bool> {
         })
         .filter(|metadata| {
             // Reject messages with the `Error` log level.
-            !metadata.target().starts_with("actix") && !metadata.target().starts_with("mio")
+            !metadata.target().starts_with("actix")
+                && !metadata.target().starts_with("mio")
+                && !metadata.target().starts_with("tokio")
+                && !metadata.target().starts_with("tungstenite")
+                && !metadata.target().starts_with("hyper")
+                && !metadata.target().starts_with("reqwest")
+                && !metadata.target().starts_with("tracing")
         })
         .chain(std::io::stderr());
 

@@ -14,10 +14,10 @@ A rust project seeking to rewrite [neon-core](https://github.com/NeonGeckoCom/Ne
     - [ ] expose rust implementation to python through a library built using maturin & PyO3
         - [ ] make a message object for python
         - [ ] make message send functions, etc
-- [ ] figure out a way to call out to [mimic3](https://github.com/MycroftAI/mimic3) (mimic3 has an HTTP server, use that for developement, testing, and as a backup.)
-    - [ ] implement a rust interface for comunications with mimic3 from rust.
-        - [ ] run the mimic3 shell command and feed it data through its STDIN then read from its STDOUT.
-        - [ ] send output via the `spoken` message type
+- [x] figure out a way to call out to [mimic3](https://github.com/MycroftAI/mimic3) (mimic3 has an HTTP server, use that for developement, testing, and as a backup.)
+    - [x] implement a rust interface for comunications with mimic3 from rust.
+        - [x] run the mimic3 shell command and feed it data through its STDIN then read from its STDOUT.
+        - [ ] ~send output via the `spoken` message type~
 - [ ] make intake server to recieve uterances from the outside world
     - [ ] function over Websockets
     - [ ] conncted to the message-bus

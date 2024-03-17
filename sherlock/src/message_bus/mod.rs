@@ -70,6 +70,7 @@ impl Handler<SherlockMessageInternalWrapper> for MessageBus {
 
     fn handle(&mut self, item: SherlockMessageInternalWrapper, ctx: &mut Self::Context) {
         if item.id != self.id {
+            debug!("connection {} recv'ed a message", self.id);
             if let Ok(json) = serde_json::to_string(&item.message) {
                 ctx.text(json);
             } else {
@@ -87,6 +88,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MessageBus {
             Ok(ws::Message::Text(text)) => {
                 // ctx.text(text.clone());
                 if let Ok(message) = serde_json::from_str(&text.to_string()) {
+                    debug!("connection {} sent a message", self.id);
                     self.event.do_send(SherlockMessageInternalWrapper {
                         id: self.id,
                         message,
@@ -119,6 +121,7 @@ async fn index(
         stream,
     );
     // info!("{:?}", resp);
+    info!("counter => {}", *counter.lock().unwrap());
     (*counter.lock().unwrap()) += 1;
 
     resp

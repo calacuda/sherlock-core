@@ -1,19 +1,19 @@
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
-use std::collections::HashMap;
+use serde_json::{json, Value};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SherlockMessage {
     #[serde(rename = "type")]
     pub msg_type: SherlockMessageType,
     #[serde(default = "empty_map")]
-    pub data: HashMap<String, Value>,
+    pub data: Value,
     #[serde(default = "empty_map")]
-    pub context: HashMap<String, Value>,
+    pub context: Value,
 }
 
-fn empty_map() -> HashMap<String, Value> {
-    HashMap::new()
+pub fn empty_map() -> Value {
+    // HashMap::new()
+    json!({})
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]

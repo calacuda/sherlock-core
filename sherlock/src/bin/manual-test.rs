@@ -15,8 +15,6 @@ fn main() {
     println!();
 
     println!("** Message Bus test Start **");
-    if let Err(e) = start_message_bus() {
-        error!("{:?}", e);
-    }
+    start_message_bus();
     println!("** Message Bus test End **");
 }
