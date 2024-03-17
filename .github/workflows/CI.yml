@@ -31,7 +31,7 @@ jobs:
       - name: Install Deps
         run: 'sudo apt update; sudo apt-get install -y libasound2 libssl-dev pkg-config;'
       - name: Set Env Vars
-        run: 'export PKG_CONFIG_PATH=/usr/lib/*-linux-gnu/pkgconfig'
+        run: 'export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig'
       - name: Switch to Nightly
         run: 'rustup default nightly'
       - name: Build wheels
