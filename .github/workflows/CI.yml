@@ -44,7 +44,7 @@ jobs:
           sccache: 'true'
           manylinux: auto
           rust-toolchain: nightly
-          container: off
+          before-script-linux: 'yum install alsa-lib-devel openssl-devel -y'
       - name: Upload wheels
         uses: actions/upload-artifact@v3
         with:
