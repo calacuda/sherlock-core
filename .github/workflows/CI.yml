@@ -34,12 +34,14 @@ jobs:
       #   run: 'export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig'
       - name: Switch to Nightly
         run: 'rustup default nightly'
+      - name: Add Target
+        run: rustup add target ${{ matrix.target }}-unknown-linux-musl
       - name: Config pkg-config
         run: "export PKG_CONFIG_SYSROOT_DIR=/"
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
-          target: ${{ matrix.target }}
+          target: ${{ matrix.target }}-unknown-linux-musl
           args: --release --out dist --find-interpreter
           sccache: 'true'
           manylinux: auto
