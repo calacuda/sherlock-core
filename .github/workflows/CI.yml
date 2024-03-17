@@ -32,8 +32,6 @@ jobs:
         run: 'sudo apt update; sudo apt-get install -y libasound2-dev libssl-dev pkg-config perl;'
       # - name: Set Env Vars
       #   run: 'export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig'
-      - name: Add Target
-        run: rustup target add ${{ matrix.target }}
       - name: Switch to Nightly
         run: 'rustup default nightly'
       - name: Config pkg-config
