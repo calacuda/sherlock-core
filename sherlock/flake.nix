@@ -43,6 +43,7 @@
             alsa-lib
             websocat
             rlwrap
+            act
             # cargo-deny
             # cargo-edit
             # cargo-watch
