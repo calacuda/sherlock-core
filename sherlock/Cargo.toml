@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 actix = "0.13.3"
 actix-broker = "0.4.3"
-actix-web = "4.5.1"
+actix-web = { version = "4.5.1", default-features = false, features = ["macros", "rustls"] }
 actix-web-actors = "4.3.0"
 anyhow = "1.0.80"
 base64 = "0.22.0"
@@ -18,7 +18,7 @@ fern = { version = "0.6.2", features = ["colored", "date-based"] }
 figment = { version = "0.10.14", features = ["toml"] }
 futures-util = "0.3.30"
 log = { version = "0.4.21", features = ["release_max_level_trace", "max_level_trace"] }
-openssl = { version = "0.10.64", features = ["vendored"] }
+# openssl = { version = "0.10.64", features = ["vendored"] }
 reqwest = "0.11.26"
 rodio = "0.17.3"
 serde = { version = "1.0.197", features = ["derive"] }
