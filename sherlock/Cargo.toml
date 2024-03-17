@@ -19,7 +19,7 @@ figment = { version = "0.10.14", features = ["toml"] }
 futures-util = "0.3.30"
 log = { version = "0.4.21", features = ["release_max_level_trace", "max_level_trace"] }
 # openssl = { version = "0.10.64", features = ["vendored"] }
-reqwest = "0.11.26"
+reqwest = { version = "0.11.26", default-features = false }
 rodio = "0.17.3"
 serde = { version = "1.0.197", features = ["derive"] }
 serde_json = "1.0.114"
