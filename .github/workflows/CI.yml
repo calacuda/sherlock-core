@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [x86_64, x86, aarch64, armv7, s390x, ppc64le]
+        target: [x86_64, x86, aarch64, armv7] # , s390x, ppc64le
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -32,10 +32,10 @@ jobs:
         run: 'sudo apt update; sudo apt-get install -y libasound2-dev libssl-dev pkg-config perl;'
       # - name: Set Env Vars
       #   run: 'export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig'
-      - name: Switch to Nightly
-        run: 'rustup default nightly'
-      - name: Config pkg-config
-        run: "export PKG_CONFIG_SYSROOT_DIR=/"
+      # - name: Switch to Nightly
+      #   run: 'rustup default nightly'
+      # - name: Config pkg-config
+      #   run: "export PKG_CONFIG_SYSROOT_DIR=/"
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
