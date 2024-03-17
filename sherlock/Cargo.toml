@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 actix = "0.13.3"
 actix-broker = "0.4.3"
-actix-web = { version = "4.5.1", default-features = false, features = ["macros", "rustls"] }
+actix-web = { version = "4.5.1", default-features = false, features = ["macros"] }
 actix-web-actors = "4.3.0"
 anyhow = "1.0.80"
 base64 = "0.22.0"
