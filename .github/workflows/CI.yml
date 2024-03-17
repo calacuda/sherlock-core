@@ -45,7 +45,7 @@ jobs:
           sccache: 'true'
           manylinux: auto
           rust-toolchain: nightly
-          before-script-linux: 'yum install alsa-lib-devel openssl-devel -y || apt-get update; apt-get install -y libasound2-dev libssl-dev pkg-config'
+          before-script-linux: 'yum install alsa-lib-devel openssl-devel -y || (apt-get update; apt-get install -y libasound2-dev libssl-dev pkg-config)'
       - name: Upload wheels
         uses: actions/upload-artifact@v3
         with:
