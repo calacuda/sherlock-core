@@ -12,6 +12,7 @@ use std::{
     },
     time::Duration,
 };
+use uuid::Uuid;
 
 pub mod messages;
 
@@ -21,7 +22,7 @@ pub struct SherlockMessageEvent;
 #[derive(Clone, Debug, Message)]
 #[rtype(result = "()")]
 pub struct SherlockMessageInternalWrapper {
-    id: usize,
+    id: Uuid,
     message: SherlockMessage,
 }
 
@@ -54,7 +55,7 @@ fn on_stopping() {
 #[derive(Clone)]
 struct MessageBus {
     event: web::Data<Addr<SherlockMessageEvent>>,
-    id: usize,
+    id: Uuid,
 }
 
 impl Actor for MessageBus {
@@ -108,21 +109,13 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MessageBus {
 
 async fn index(
     data: web::Data<Addr<SherlockMessageEvent>>,
-    counter: web::Data<Mutex<usize>>,
     req: HttpRequest,
     stream: web::Payload,
 ) -> Result<HttpResponse, Error> {
-    let resp = ws::start(
-        MessageBus {
-            event: data,
-            id: *counter.lock().unwrap(),
-        },
-        &req,
-        stream,
-    );
+    let id = Uuid::new_v4();
+    let resp = ws::start(MessageBus { event: data, id }, &req, stream);
     // info!("{:?}", resp);
-    info!("counter => {}", *counter.lock().unwrap());
-    (*counter.lock().unwrap()) += 1;
+    info!("ID => {id}");
 
     resp
 }
@@ -130,12 +123,10 @@ async fn index(
 #[actix_web::main]
 async fn start(configs: Configuration) -> anyhow::Result<()> {
     let msg_event_addr = web::Data::new(SherlockMessageEvent.start());
-    let counter = web::Data::new(Mutex::new(0_usize));
 
     HttpServer::new(move || {
         App::new()
             .app_data(msg_event_addr.clone())
-            .app_data(counter.clone())
             .route(&configs.websocket.route, web::get().to(index))
     })
     .bind((configs.websocket.host, configs.websocket.port))?

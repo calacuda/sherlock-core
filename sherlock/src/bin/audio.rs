@@ -1,9 +1,5 @@
 #![feature(let_chains)]
-use base64::{engine::general_purpose::STANDARD, Engine as _};
-use futures_util::{
-    stream::{SplitSink, SplitStream},
-    SinkExt, StreamExt,
-};
+use futures_util::{stream::SplitSink, SinkExt, StreamExt};
 use log::*;
 use rodio::Source;
 use serde_json::json;
