@@ -41,6 +41,8 @@
             openssl
             pkg-config
             alsa-lib
+            websocat
+            rlwrap
             # cargo-deny
             # cargo-edit
             # cargo-watch
