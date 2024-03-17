@@ -57,7 +57,7 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_JOB_NAME: "Linux Build"
+          GITHUB_JOB_NAME: "Linux Build ${{ matrix.target }}"
           GITHUB_JOB_STATUS: ${{ job.status }}
 
   # windows:
