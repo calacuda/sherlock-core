@@ -56,6 +56,9 @@ jobs:
         if: ${{ always() }}
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_JOB_NAME: "Linux Build"
+          GITHUB_JOB_STATUS: ${{ job.status }}
 
   # windows:
   #   runs-on: windows-latest
@@ -140,3 +143,6 @@ jobs:
         if: ${{ always() }}
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_JOB_NAME: "Releasae"
+          GITHUB_JOB_STATUS: ${{ job.status }}
