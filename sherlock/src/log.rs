@@ -49,6 +49,8 @@ fn logger_init_helper(module: SherlockModule) -> anyhow::Result<bool> {
         .warn(Color::Magenta)
         .error(Color::Red);
 
+    // TODO: rename log messages to be inline with mycroft.
+
     let dispatch = fern::Dispatch::new()
         .format(move |out, message, record| {
             out.finish(format_args!(

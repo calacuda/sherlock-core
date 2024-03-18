@@ -4,6 +4,9 @@ default:
 websocat:
   rlwrap websocat ws://127.0.0.1:8181/core
 
+websocat-intake:
+  rlwrap websocat ws://127.0.0.1:8080/core
+
 build:
   cargo build
 
