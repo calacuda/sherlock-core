@@ -1,9 +1,11 @@
 #![feature(let_chains)]
 use std::fmt::Display;
 
+pub mod audio;
 pub mod log;
 pub mod message_bus;
 pub mod utils;
+pub mod voice;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum SherlockModule {

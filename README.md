@@ -28,9 +28,11 @@ A rust project seeking to rewrite [neon-core](https://github.com/NeonGeckoCom/Ne
     - [ ] handles authentication
     - [ ] optionally secured with TLS
         - [x] turn on/off from config file.
+    - [ ] take audio data from websocket connection.
 - [ ] make skill chooser
-    - [ ] make a utility to be used by a python decorator that loads intent files and produces a way to check the users utterance against that file.
-<!-- - [ ]  -->
+    <!-- - [ ] make a utility to be used by a python decorator that loads intent files and produces a way to check the users utterance against that file. -->
+    - [ ] implement skills as executable files
+    - [ ] design skill config file
 
 **more to come...**
 
