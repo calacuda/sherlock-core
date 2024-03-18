@@ -19,15 +19,15 @@ A rust project seeking to rewrite [neon-core](https://github.com/NeonGeckoCom/Ne
         - [x] run the mimic3 shell command and feed it data through its STDIN then read from its STDOUT.
         - [ ] ~send output via the `spoken` message type~
 - [ ] make intake server to receive uterances from the outside world
-    - [ ] function over Websockets
-    - [ ] conncted to the message-bus
-    - [ ] take uterances/commands from the outside world.
+    - [x] function over Websockets
+    - [x] conncted to the message-bus
+    - [x] take uterances/commands from the outside world.
     - [ ] send back `speak` messages, &:
         - [ ] TTS speech data if requested,
         - [ ] client control byte code (if received from the message-bus)
     - [ ] handles authentication
     - [ ] optionally secured with TLS
-        - [ ] turn on/off from config file.
+        - [x] turn on/off from config file.
 - [ ] make skill chooser
     - [ ] make a utility to be used by a python decorator that loads intent files and produces a way to check the users utterance against that file.
 <!-- - [ ]  -->
