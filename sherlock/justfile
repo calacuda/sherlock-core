@@ -1,0 +1,17 @@
+default:
+  just -l
+
+websocat:
+  rlwrap websocat ws://127.0.0.1:8181/core
+
+build:
+  cargo build
+
+audio:
+  cargo run --bin audio
+
+message-bus:
+  cargo run --bin message_bus
+
+voice:
+  cargo run --bin voice

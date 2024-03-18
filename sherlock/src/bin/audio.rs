@@ -1,143 +1,152 @@
 #![feature(let_chains)]
-use futures_util::{stream::SplitSink, SinkExt, StreamExt};
+use std::{
+    net::TcpStream,
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
+    time::Duration,
+};
+
+use actix::{Actor, AsyncContext, Handler, Message, StreamHandler};
+use actix_web::{error, http::StatusCode, web, App, Error, HttpRequest, HttpResponse, HttpServer};
+use actix_web_actors::ws;
 use log::*;
-use rodio::Source;
-use serde_json::json;
 use sherlock::{
     log::logger_init,
-    message_bus::messages::{empty_map, SherlockMessage, SherlockMessageType},
+    message_bus::messages::{SherlockMessage, SherlockMessageType},
     utils::config::Configuration,
     SherlockModule,
 };
-use tokio::io::{AsyncRead, AsyncWrite};
-use tokio::process::Command;
-use tokio_tungstenite::{connect_async, tungstenite::Message, WebSocketStream};
+use tungstenite::{connect, stream::MaybeTlsStream, WebSocket};
+use uuid::Uuid;
 
-struct Wav {
-    iter: Vec<i16>,
-    i: usize,
+/// Define HTTP actor
+struct IntakeServer {
+    bus: WebSocket<MaybeTlsStream<TcpStream>>,
+    id: Uuid,
 }
 
-impl Iterator for Wav {
-    type Item = i16;
+impl Actor for IntakeServer {
+    type Context = ws::WebsocketContext<Self>;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        let res = self.iter.get(self.i).map(|val| *val);
-        self.i += 1;
-
-        res
+    fn started(&mut self, ctx: &mut Self::Context) {
+        // TODO: read messages from message-bus and send speak messages to client
     }
 }
 
-impl Source for Wav {
-    fn channels(&self) -> u16 {
-        1
-    }
-
-    fn sample_rate(&self) -> u32 {
-        22_050
-    }
-
-    fn current_frame_len(&self) -> Option<usize> {
-        None
-    }
-
-    fn total_duration(&self) -> Option<std::time::Duration> {
-        None
+/// Handler for ws::Message message
+impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for IntakeServer {
+    fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
+        match msg {
+            Ok(ws::Message::Ping(msg)) => ctx.pong(&msg),
+            Ok(ws::Message::Text(text)) => {
+                // ctx.text(text.clone());
+                if let Ok(message) = serde_json::from_str::<SherlockMessage>(&text.to_string())
+                    && message.msg_type == SherlockMessageType::RecognizerLoopUtterance
+                {
+                    // debug!("connection {} sent a message", self.id);
+                    if let Err(e) = self.bus.send(tungstenite::Message::Text(text.into())) {
+                        warn!("could not communicate with internal message-bus: {e}");
+                    }
+                } else {
+                    warn!("received a message that doesn't follow Sherlock Message specifications. Did you serialize it using from a SherlockMessage struct/object?");
+                    ctx.text("{\"response\":\"malformed JSON message.\"}")
+                }
+            }
+            Ok(ws::Message::Binary(_bin)) => {
+                ctx.text("{\"response\":\"binary messages/responces are not yet implemented\"}")
+            } // ctx.binary(bin),
+            _ => (),
+        }
     }
 }
 
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
-    logger_init(SherlockModule::Audio);
-    let configs = Configuration::get();
+async fn index(
+    configs: web::Data<Configuration>,
+    req: HttpRequest,
+    stream: web::Payload,
+) -> Result<HttpResponse, Error> {
+    let id = Uuid::new_v4();
     let url = format!(
         "ws://{}:{}/core",
         configs.websocket.host, configs.websocket.port
     );
 
-    debug!("connecting to messagebus at \'{}\'.", url);
-    let (ws_stream, _) = connect_async(url).await.expect("Failed to connect");
+    if let Ok((ws_stream, _)) = connect(url) {
+        let resp = ws::start(IntakeServer { bus: ws_stream, id }, &req, stream);
+        // info!("{:?}", resp);
+        info!("ID => {id}");
 
-    // TODO: take host from config file
-    let mimic_handle = tokio::spawn(
-        Command::new("mimic3-server")
-            .arg("--host")
-            .arg("127.0.0.1")
-            .output(),
-    );
-
-    debug!("mimic3-server started");
-    let (_stream, handle) = rodio::OutputStream::try_default().unwrap();
-
-    // Handle incoming messages in a separate task
-    let read_handle = tokio::spawn(handle_incoming_messages(ws_stream, handle));
-
-    tokio::try_join!(read_handle, mimic_handle)?.1?;
-
-    Ok(())
-}
-
-async fn handle_incoming_messages(
-    // mut read: SplitStream<WebSocketStream<impl AsyncRead + AsyncWrite + Unpin>>,
-    // mut write: SplitSink<WebSocketStream<impl AsyncRead + AsyncWrite + Unpin>, Message>,
-    mut ws_stream: WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>,
-    handle: rodio::OutputStreamHandle,
-) {
-    let sink = rodio::Sink::try_new(&handle).unwrap();
-
-    while let Some(message) = ws_stream.next().await {
-        match message {
-            Ok(Message::Text(msg)) => {
-                if let Ok(message) = serde_json::from_str::<SherlockMessage>(&msg)
-                    && message.msg_type == SherlockMessageType::Speak
-                {
-                    if let Some(ut) = message.data.get("utterance") {
-                        if let Ok(samples) = tts(&ut.to_string()).await {
-                            sink.append(Wav {
-                                iter: samples,
-                                i: 0,
-                            });
-                            debug!("speaking: {}", ut);
-                        } else {
-                            warn!("failed to get wav bytes from mimic3-server.")
-                        }
-                    } else {
-                        warn!("speak message had no uterance to speak.");
-                    }
-                }
-            }
-            Err(e) => warn!("Error receiving message: {}", e),
-            _ => {}
-        }
+        resp
+    } else {
+        // "could not connect to message-bus!"
+        Err(error::InternalError::new(
+            "could not connect to message-bus!",
+            StatusCode::INTERNAL_SERVER_ERROR,
+        )
+        .into())
     }
 }
 
-async fn tts(ut: &str) -> anyhow::Result<Vec<i16>> {
-    Ok(reqwest::Client::new()
-        .post("http://127.0.0.1:59125/api/tts")
-        .body(ut.to_string())
-        .send()
-        .await?
-        .bytes()
-        .await?
-        .to_vec()
-        .chunks(2)
-        .map(|b_s| i16::from_le_bytes([b_s[0], b_s[1]]))
-        .collect())
-}
+#[actix_web::main]
+async fn start(configs: Configuration) -> anyhow::Result<()> {
+    let msg_event_addr = web::Data::new(Configuration::get());
 
-async fn speak(
-    mut write: SplitSink<WebSocketStream<impl AsyncRead + AsyncWrite + Unpin>, Message>,
-    utterance: &str,
-) -> anyhow::Result<()> {
-    let msg = serde_json::to_string(&SherlockMessage {
-        msg_type: SherlockMessageType::Speak,
-        data: json!({"utterance": utterance}),
-        context: empty_map(),
-    })?;
-
-    write.send(Message::Text(msg)).await?;
+    HttpServer::new(move || {
+        App::new()
+            .app_data(msg_event_addr.clone())
+            .route(&configs.websocket.route, web::get().to(index))
+    })
+    .bind((configs.intake.host, configs.intake.port))?
+    .run()
+    .await?;
 
     Ok(())
+}
+
+fn on_ready() {
+    debug!("Audio service started!")
+}
+
+fn on_stopping() {
+    debug!("Audio service is shutting down...");
+}
+
+pub fn start_intake_server() {
+    debug!("Loading intake server configs");
+
+    let configs = Configuration::get();
+
+    let running = Arc::new(AtomicBool::new(true));
+    let r = running.clone();
+
+    ctrlc::set_handler(move || {
+        on_stopping();
+        r.store(false, Ordering::SeqCst);
+    })
+    .expect("Error setting Ctrl-C handler");
+
+    let r = running.clone();
+
+    std::thread::spawn(move || {
+        if let Err(e) = start(configs) {
+            error!("Intake failed to start: {e}");
+            r.store(false, Ordering::SeqCst);
+        }
+    });
+
+    on_ready();
+
+    while running.load(Ordering::SeqCst) {
+        // debug!("waiting...");
+        std::thread::sleep(Duration::from_secs(1));
+    }
+}
+
+fn main() {
+    logger_init(SherlockModule::Audio);
+
+    // info!("starts the main ingress server that excepts http/websocat requests, and returns the text/TTS speech.");
+    start_intake_server();
 }

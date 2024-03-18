@@ -5,11 +5,13 @@ use figment::{
 use log::error;
 use serde::Deserialize;
 
+pub mod intake;
 pub mod websocket;
 
 #[derive(Default, Clone, Deserialize, Debug)]
 pub struct Configuration {
     pub websocket: websocket::Websocket,
+    pub intake: intake::Intake,
 }
 
 impl Configuration {

@@ -3,3 +3,9 @@ host = "127.0.0.1"
 port = 8181
 route = "/core"
 ssl = false
+
+[intake]
+host = "127.0.0.1"
+port = 8080
+route = "/sherlock"
+ssl = false
