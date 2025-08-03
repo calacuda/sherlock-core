@@ -9,3 +9,6 @@ host = "127.0.0.1"
 port = 8080
 route = "/sherlock"
 ssl = false
+
+[skills]
+dir = "/opt/sherlock/skills"

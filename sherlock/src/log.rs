@@ -59,7 +59,7 @@ fn logger_init_helper(module: SherlockModule) -> anyhow::Result<bool> {
                 asctime = format!("{}", Local::now().format("%a %h %d %H:%M:%S %Y")),
                 level = record.level(),
                 process = std::process::id(),
-                name = record.target(),
+                name = module,
                 message = message,
             ))
         })
@@ -100,7 +100,31 @@ fn logger_init_helper(module: SherlockModule) -> anyhow::Result<bool> {
                 .apply()?;
             Ok(true)
         }
-        Ok(_) | Err(_) => {
+        Ok(()) => {
+            dispatch
+                .format(move |out, message, record| {
+                    out.finish(format_args!(
+                        "{asctime} | {level} | {process} | {name} |  {message}",
+                        asctime = format!("{}", Local::now().format("%a %h %d %H:%M:%S %Y")),
+                        level = record.level(),
+                        process = std::process::id(),
+                        name = record.target(),
+                        message = message,
+                    ))
+                })
+                .filter(|metadata| metadata.target().starts_with("sherlock"))
+                .chain(fern::DateBased::new(
+                    format!("/var/log/sherlock/{}/", module),
+                    "%Y-%m-%d.log",
+                ))
+                .chain(fern::DateBased::new(
+                    "/var/log/sherlock/by-date/",
+                    "%Y-%m-%d.log",
+                ))
+                .apply()?;
+            Ok(true)
+        }
+        Err(_) => {
             dispatch.apply()?;
             warn!("not logging to log files, this should only be done when testing. if you are running this in prod, be warned.");
             Ok(false)

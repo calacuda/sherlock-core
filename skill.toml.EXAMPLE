@@ -1,0 +1,9 @@
+[metadata]
+name = "skill"
+executable = "./skill"
+
+[functions.do_thing]
+variables = [
+  "foo",
+  { name = "foo", optional = true },
+]

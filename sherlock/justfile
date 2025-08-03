@@ -18,3 +18,6 @@ message-bus:
 
 voice:
   cargo run --bin voice
+
+skills:
+  cargo run --bin skills

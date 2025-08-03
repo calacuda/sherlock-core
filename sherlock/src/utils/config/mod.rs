@@ -6,12 +6,15 @@ use log::error;
 use serde::Deserialize;
 
 pub mod intake;
+pub mod skills;
 pub mod websocket;
 
 #[derive(Default, Clone, Deserialize, Debug)]
 pub struct Configuration {
+    #[serde(rename = "message_bus")]
     pub websocket: websocket::Websocket,
     pub intake: intake::Intake,
+    pub skills: skills::Skills,
 }
 
 impl Configuration {
@@ -22,17 +25,18 @@ impl Configuration {
                     let _ = std::fs::File::create(config_file.clone());
                 }
 
-                if let Ok(config) = Figment::new()
+                match Figment::new()
                     .merge(Toml::file(config_file.clone()))
                     .extract()
                 {
-                    config
-                } else {
-                    error!(
-                        "could not load config file at \"{}\".",
-                        config_file.to_string_lossy()
-                    );
-                    Self::default()
+                    Ok(config) => config,
+                    Err(e) => {
+                        error!(
+                            "could not load config file at \"{}\". got error: {e}",
+                            config_file.to_string_lossy()
+                        );
+                        Self::default()
+                    }
                 }
             } else {
                 error!("unable to find/create config directory.");

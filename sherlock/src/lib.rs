@@ -4,6 +4,7 @@ use std::fmt::Display;
 pub mod audio;
 pub mod log;
 pub mod message_bus;
+pub mod skills;
 pub mod utils;
 pub mod voice;
 
@@ -23,7 +24,7 @@ impl Display for SherlockModule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match *self {
             Self::Audio => write!(f, "audio"),
-            Self::MessageBus => write!(f, "bus"),
+            Self::MessageBus => write!(f, "message-bus"),
             Self::Skills => write!(f, "skills"),
             Self::Voice => write!(f, "voice"),
         }
